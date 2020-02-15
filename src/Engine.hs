@@ -1,5 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | This is a core engine module, and should probably not used directly.
+-- | There is also `Framework.hs` nearby, which exposes a more high-level API.
+
 module Engine where
 
 import Control.Monad
@@ -20,21 +23,45 @@ data KeyPress = KeyPress String
 -- | Output action from state changes
 data Action
   = RestartMusic
+  | Print String
+  | CombinedAction Action Action
   | NoAction
 
 -- | Output picture drawn on the screen.
 data Picture
-  = Draw (Float, Float) Int       -- ^ Draw a picture by its index at coords
-  | Combined Picture Picture      -- ^ Two output pictures combined
-  | Blank                         -- ^ No-op picture
+  = Draw Float (Float, Float) Int     -- ^ Draw a picture by its index at coords
+  | CombinedPicture Picture Picture   -- ^ Two output pictures combined
+  | Blank                             -- ^ No-op picture
+
+class Combinable a where
+  combine :: a -> a -> a
+
+instance Combinable Action where
+  combine a NoAction = a
+  combine NoAction a = a
+  combine a1 a2 = CombinedAction a1 a2
+
+instance Combinable Picture where
+  combine p Blank = p
+  combine Blank p = p
+  combine p1 p2 = CombinedPicture p1 p2
 
 -- | Transated picture
 translated :: (Float, Float) -> Picture -> Picture
-translated t (Combined o1 o2) = Combined (translated t o1) (translated t o2)
-translated (dx, dy) (Draw (x, y) i) = Draw (x + dx, y + dy) i
+translated t (CombinedPicture o1 o2) = CombinedPicture (translated t o1) (translated t o2)
+translated (dx, dy) (Draw s (x, y) i) = Draw s (x + dx, y + dy) i
+translated _ x = x
+
+-- | Scaled picture
+scaled :: Float -> Picture -> Picture
+scaled s (CombinedPicture o1 o2) = CombinedPicture (scaled s o1) (scaled s o2)
+scaled s (Draw s' p i) = Draw (s * s') p i
+scaled _ x = x
 
 -- =============================================================================
 -- Generic main function {{{1
+
+targetFPS = 60
 
 screenWidth, screenHeight :: CInt
 (screenWidth, screenHeight) = (640, 480)
@@ -78,18 +105,29 @@ runSDL
 
       SDL.Mixer.playMusic SDL.Mixer.Once music
 
-      let loop world = do
+      let loop lastFrame world = do
+            time <- SDL.time
+            let dt = time - lastFrame
+
             events <- SDL.pollEvents
             let quit = elem SDL.QuitEvent $ map SDL.eventPayload events
 
-            GL.clear [GL.ColorBuffer]
+            SDL.surfaceFillRect windowSurface Nothing (SDL.V4 0 0 0 255)
             draw images (drawWorld world) windowSurface
+
             SDL.updateWindowSurface window
             SDL.glSwapWindow window
 
-            unless quit (loop world)
+            let (newWorld, action) = updateWorld dt world
 
-      loop initialWorld
+            case action of
+              (Print s) -> print s
+              _         -> return ()
+
+            unless quit (loop time newWorld)
+
+      time <- SDL.time
+      loop time initialWorld
 
       SDL.destroyWindow window
       SDL.quit
@@ -103,16 +141,26 @@ loadImages paths
         output <- action
         return (output:list)
 
-draw :: [SDL.Surface] -> Picture -> SDL.Surface -> IO (Maybe (SDL.Rectangle CInt))
-draw textures Blank _ = return Nothing
-draw textures (Combined pic1 pic2) target = do
+draw :: [SDL.Surface] -> Picture -> SDL.Surface -> IO ()
+draw textures Blank _ = return ()
+draw textures (CombinedPicture pic1 pic2) target = do
   draw textures pic1 target
   draw textures pic2 target
-draw textures (Draw (x, y) i) target
-  = SDL.surfaceBlit
-      (textures !! i)
-      Nothing
-      target
-      (Just $ SDL.P $ SDL.V2 (round x :: CInt) (round y))
+draw textures (Draw s (x, y) i) target = do
+  let texture = textures !! i
+  (SDL.V2 w h) <- SDL.surfaceDimensions texture
+
+  let targetX = round x :: CInt
+  let targetY = round y :: CInt
+  let targetW = round (fromIntegral w * s)
+  let targetH = round (fromIntegral h * s)
+
+  SDL.surfaceBlitScaled
+    (textures !! i)
+    Nothing
+    target
+    (Just $ SDL.Rectangle
+      (SDL.P $ SDL.V2 targetX targetY)
+      (SDL.V2 targetW targetH))
 
 -- vim: set ts=2 sw=2 fdm=marker:
