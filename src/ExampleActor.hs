@@ -1,42 +1,42 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module ExampleActor (
-  exampleActor
+  ExampleActor(..)
 ) where
 
 import Data.Fixed
 
-import Engine (KeyPress, Action(NoAction))
+import Event
 import Framework
 
-data State = State Float (Float, Float) Float
+import ExampleActor2
 
-exampleActor :: Actor State
-exampleActor
-  = Actor
-      (State 1 (0, 0) 0)
-      "resources/fff.jpg"
-      draw
-      handleEvent
-      update
+data ExampleActor = ExampleActor Float (Float, Float) Float
 
+instance Actor ExampleActor where
+  texturePath = const "resources/fff.jpg"
+
+  drawFunc (ExampleActor scale position _) = (scale, position)
+
+  handleEventFunc (ExampleActor scale (x, y) time) (TestEvent (tx, ty))
+    = ExampleActor scale (min x tx, min y ty) time
+  handleEventFunc (ExampleActor scale (x, y) time) (KeyPress KeyRight)
+    = ExampleActor scale (x + 10, y) time
+  handleEventFunc (ExampleActor scale (x, y) time) (KeyPress KeyDown)
+    = ExampleActor scale (x, y + 10) time
+  handleEventFunc self _ = self
+
+  updateFunc (ExampleActor scale position time) dt = (newActor, NoEvent)
+    where
+      newTime = time + dt
+      newScale = (1 + abs (sin (2 * pi * slt))) * 0.1
+      slt = scaledLocalTime newTime
+      newActor = ExampleActor newScale position newTime
 
 offsetQuarters = 2
 bpm = 98 / 4
 spb = 60 / bpm
 localTime dt = (dt - offsetQuarters * spb) `mod'` spb
 scaledLocalTime dt = localTime dt / spb
-
-draw :: Actor State -> (Float, (Float, Float))
-draw (Actor (State scale position _) _ _ _ _) = (scale, position)
-
-handleEvent :: KeyPress -> Actor State -> Actor State
-handleEvent _ = id
-
-update :: Float -> Actor State -> (Actor State, Action)
-update dt actor = (updateState (State newScale position newTime) actor, NoAction)
-  where
-    (State scale position time) = state actor
-    newTime = time + dt
-    newScale = (1 + abs (sin (2 * pi * slt))) * 0.1
-    slt = scaledLocalTime newTime
 
 -- vim: set ts=2 sw=2 fdm=marker:

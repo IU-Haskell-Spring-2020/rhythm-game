@@ -18,7 +18,8 @@ import qualified SDL.Mixer
 -- Output interface {{{1
 
 -- | Key press event that is going to be sent to the application
-data KeyPress = KeyPress String
+data KeyPress
+  = KeyLeft | KeyRight | KeyUp | KeyDown
 
 -- | Output action from state changes
 data Action
@@ -109,28 +110,60 @@ runSDL
             time <- SDL.time
             let dt = time - lastFrame
 
-            events <- SDL.pollEvents
-            let quit = elem SDL.QuitEvent $ map SDL.eventPayload events
-
-            SDL.surfaceFillRect windowSurface Nothing (SDL.V4 0 0 0 255)
-            draw images (drawWorld world) windowSurface
-
-            SDL.updateWindowSurface window
-            SDL.glSwapWindow window
-
-            let (newWorld, action) = updateWorld dt world
+            let (updatedWorld, action) = updateWorld dt world
 
             case action of
               (Print s) -> print s
               _         -> return ()
 
-            unless quit (loop time newWorld)
+            events <- SDL.pollEvents
+            let quit = elem SDL.QuitEvent $ map SDL.eventPayload events
+            let keyPresses = mapEvents events
+
+            let handledWorld = handleEvents keyPresses handleEvent updatedWorld
+
+            SDL.surfaceFillRect windowSurface Nothing (SDL.V4 0 0 0 255)
+            draw images (drawWorld handledWorld) windowSurface
+
+            SDL.updateWindowSurface window
+            SDL.glSwapWindow window
+
+            unless quit (loop time handledWorld)
 
       time <- SDL.time
       loop time initialWorld
 
       SDL.destroyWindow window
       SDL.quit
+
+handleEvents :: [KeyPress] -> (KeyPress -> world -> world) -> world -> world
+handleEvents [] _ world = world
+handleEvents (event:events) handler world
+  = handleEvents events handler (handler event world)
+
+mapEvents :: [SDL.Event] -> [KeyPress]
+mapEvents [] = []
+mapEvents (event:events) = outputEvents
+  where
+    payload = SDL.eventPayload event
+    tailEvents = mapEvents events
+    maybeTargetEvent
+      = case payload of
+          SDL.KeyboardEvent (SDL.KeyboardEventData _ SDL.Pressed _ (SDL.Keysym code _ _))
+            -> mapCode code
+          _ -> Nothing
+    outputEvents
+      = case maybeTargetEvent of
+          Just event -> event:tailEvents
+          Nothing -> tailEvents
+
+
+mapCode :: SDL.Scancode -> Maybe KeyPress
+mapCode SDL.ScancodeUp = Just KeyUp
+mapCode SDL.ScancodeDown = Just KeyDown
+mapCode SDL.ScancodeLeft = Just KeyLeft
+mapCode SDL.ScancodeRight = Just KeyRight
+mapCode _ = Nothing
 
 -- | Load images from paths into an array.
 loadImages :: [String] -> IO [SDL.Surface]
