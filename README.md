@@ -18,6 +18,7 @@ If you have a system that is not listed here, please somehow install `sdl2`,
 Brew can do the work for you:
 
 ```
+$ brew install pkg-config
 $ brew install sdl2 sdl2_image sdl2_mixer
 ```
 
