@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module ExampleActor (
   ExampleActor,
   ExampleActor.init,
@@ -42,16 +40,6 @@ handleEvent KeyRight me = me { pos = (x + 10, y) }
 
 
 update :: Float -> ExampleActor -> ExampleActor
-update dt (ExampleActor scale position time) = ExampleActor newScale position newTime
-  where
-    newTime = time + dt
-    newScale = (1 + abs (sin (2 * pi * slt))) * 0.1
-    slt = scaledLocalTime newTime
-
-offsetQuarters = 2
-bpm = 98 / 4
-spb = 60 / bpm
-localTime dt = (dt - offsetQuarters * spb) `mod'` spb
-scaledLocalTime dt = localTime dt / spb
+update dt = id
 
 -- vim: set ts=2 sw=2 fdm=marker:

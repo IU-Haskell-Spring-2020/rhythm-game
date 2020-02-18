@@ -8,12 +8,18 @@ module World (
 ) where
 
 import Framework.Types
+
+import MeasureTime (scaledMeasureLocalTime)
 import qualified ExampleActor
 import qualified ExampleActor2
+import qualified RainbowFloor
 
 data World = World {
   exampleActor :: ExampleActor.ExampleActor,
-  exampleActor2 :: ExampleActor2.ExampleActor2
+  exampleActor2 :: ExampleActor2.ExampleActor2,
+  floor :: RainbowFloor.RainbowFloor,
+
+  passedTime :: Float
 }
 
 -- =============================================================================
@@ -23,7 +29,10 @@ data World = World {
 init :: World
 init = World {
   exampleActor = ExampleActor.init,
-  exampleActor2 = ExampleActor2.init
+  exampleActor2 = ExampleActor2.init,
+  World.floor = RainbowFloor.init,
+
+  passedTime = 0
   }
 
 -- | List of texture filenames which are going to be loaded for this world.
@@ -37,18 +46,25 @@ draw :: World -> StringPicture
 draw world
   = foldr combine Blank [
       ExampleActor.draw (exampleActor world),
-      ExampleActor2.draw (exampleActor2 world)
+      ExampleActor2.draw (exampleActor2 world),
+      translated (200, 200) $ RainbowFloor.draw (World.floor world)
     ]
 
 -- | Update the world from a dt.
 update :: Float -> World -> (World, Action)
 update dt world = (
   updateWorldCollision $ world {
-    exampleActor = ExampleActor.update dt $ exampleActor world,
-    exampleActor2 = ExampleActor2.update dt $ exampleActor2 world
+    exampleActor = ExampleActor.update newPassedTime $ exampleActor world,
+    exampleActor2 = ExampleActor2.update $ exampleActor2 world,
+    World.floor = RainbowFloor.update smlt $ World.floor world,
+
+    passedTime = newPassedTime
   },
   NoAction
   )
+    where
+      newPassedTime = passedTime world + dt
+      smlt = scaledMeasureLocalTime (passedTime world)
 
 updateWorldCollision :: World -> World
 updateWorldCollision world = world { exampleActor = newExampleActor }

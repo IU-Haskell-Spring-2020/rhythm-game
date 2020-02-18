@@ -20,8 +20,8 @@ init = ExampleActor2 (100, 100)
 draw :: ExampleActor2 -> StringPicture
 draw (ExampleActor2 pos) = Draw 0.05 pos "fff"
 
-update :: Float -> ExampleActor2 -> ExampleActor2
-update = const id
+update :: ExampleActor2 -> ExampleActor2
+update = id
 
 handleEvent :: KeyPress -> ExampleActor2 -> ExampleActor2
 handleEvent = const id
