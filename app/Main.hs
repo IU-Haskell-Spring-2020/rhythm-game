@@ -1,8 +1,8 @@
 module Main where
 
-import Lib (run)
+import Framework.Runner (runWorld)
 
 main :: IO ()
-main = run
+main = runWorld
 
 -- vim: set ts=2 sw=2 fdm=marker:

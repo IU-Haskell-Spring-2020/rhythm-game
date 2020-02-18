@@ -1,8 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | This is a core engine module, and should probably not used directly.
--- | There is also `Framework.hs` nearby, which exposes a more high-level API.
-
 module Engine where
 
 import Control.Monad
@@ -29,10 +26,12 @@ data Action
   | NoAction
 
 -- | Output picture drawn on the screen.
-data Picture
-  = Draw Float (Float, Float) Int     -- ^ Draw a picture by its index at coords
-  | CombinedPicture Picture Picture   -- ^ Two output pictures combined
-  | Blank                             -- ^ No-op picture
+data Picture target
+  = Draw Float (Float, Float) target                   -- ^ Draw a picture by its index at coords
+  | CombinedPicture (Picture target) (Picture target)  -- ^ Two output pictures combined
+  | Blank                                              -- ^ No-op picture
+
+type IntPicture = Picture Int
 
 class Combinable a where
   combine :: a -> a -> a
@@ -42,19 +41,19 @@ instance Combinable Action where
   combine NoAction a = a
   combine a1 a2 = CombinedAction a1 a2
 
-instance Combinable Picture where
+instance Combinable (Picture a) where
   combine p Blank = p
   combine Blank p = p
   combine p1 p2 = CombinedPicture p1 p2
 
 -- | Transated picture
-translated :: (Float, Float) -> Picture -> Picture
+translated :: (Float, Float) -> Picture a -> Picture a
 translated t (CombinedPicture o1 o2) = CombinedPicture (translated t o1) (translated t o2)
 translated (dx, dy) (Draw s (x, y) i) = Draw s (x + dx, y + dy) i
 translated _ x = x
 
 -- | Scaled picture
-scaled :: Float -> Picture -> Picture
+scaled :: Float -> Picture a -> Picture a
 scaled s (CombinedPicture o1 o2) = CombinedPicture (scaled s o1) (scaled s o2)
 scaled s (Draw s' p i) = Draw (s * s') p i
 scaled _ x = x
@@ -75,7 +74,7 @@ runSDL
   -- loop
   -> (KeyPress -> world -> world)           -- ^ Event handler
   -> (Float -> world -> (world, Action))    -- ^ World updater
-  -> (world -> Picture)                     -- ^ World painter
+  -> (world -> IntPicture)                  -- ^ World painter
   -- output
   -> IO ()
 
@@ -182,7 +181,7 @@ loadImages paths
         output <- action
         return (output:list)
 
-draw :: [SDL.Surface] -> Picture -> SDL.Surface -> IO ()
+draw :: [SDL.Surface] -> IntPicture -> SDL.Surface -> IO ()
 draw textures Blank _ = return ()
 draw textures (CombinedPicture pic1 pic2) target = do
   draw textures pic1 target

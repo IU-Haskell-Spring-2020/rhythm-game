@@ -1,37 +1,52 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module ExampleActor (
-  ExampleActor(..)
+  ExampleActor,
+  ExampleActor.init,
+  draw,
+  handleEvent,
+  update,
+
+  pos
 ) where
 
 import Data.Fixed
 
-import Event
-import Framework
+import Framework.Types
 
-import ExampleActor2
+data ExampleActor = ExampleActor {
+  scale :: Float,
+  pos :: (Float, Float),
+  time :: Float
+}
 
-data ExampleActor = ExampleActor Float (Float, Float) Float
+init :: ExampleActor
+init = ExampleActor 0.3 (0, 0) 0
 
-instance Actor ExampleActor where
-  texturePath = const "resources/fff.jpg"
+draw :: ExampleActor -> StringPicture
+draw (ExampleActor scale pos _) = Draw scale pos "fff"
 
-  drawFunc (ExampleActor scale position _) = (scale, position)
+handleEvent :: KeyPress -> ExampleActor -> ExampleActor
 
-  handleEventFunc (ExampleActor scale (x, y) time) (TestEvent (tx, ty))
-    = ExampleActor scale (min x tx, min y ty) time
-  handleEventFunc (ExampleActor scale (x, y) time) (KeyPress KeyRight)
-    = ExampleActor scale (x + 10, y) time
-  handleEventFunc (ExampleActor scale (x, y) time) (KeyPress KeyDown)
-    = ExampleActor scale (x, y + 10) time
-  handleEventFunc self _ = self
+handleEvent KeyUp me = me { pos = (x, y - 10) }
+  where (x, y) = pos me
 
-  updateFunc (ExampleActor scale position time) dt = (newActor, NoEvent)
-    where
-      newTime = time + dt
-      newScale = (1 + abs (sin (2 * pi * slt))) * 0.1
-      slt = scaledLocalTime newTime
-      newActor = ExampleActor newScale position newTime
+handleEvent KeyDown me = me { pos = (x, y + 10) }
+  where (x, y) = pos me
+
+handleEvent KeyLeft me = me { pos = (x - 10, y) }
+  where (x, y) = pos me
+
+handleEvent KeyRight me = me { pos = (x + 10, y) }
+  where (x, y) = pos me
+
+
+update :: Float -> ExampleActor -> ExampleActor
+update dt (ExampleActor scale position time) = ExampleActor newScale position newTime
+  where
+    newTime = time + dt
+    newScale = (1 + abs (sin (2 * pi * slt))) * 0.1
+    slt = scaledLocalTime newTime
 
 offsetQuarters = 2
 bpm = 98 / 4

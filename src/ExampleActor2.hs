@@ -1,16 +1,29 @@
 module ExampleActor2 (
-  ExampleActor2(..),
-  Actor(..)
+  ExampleActor2,
+  ExampleActor2.init,
+  draw,
+  handleEvent,
+  update,
+
+  pos
 ) where
 
-import Event
-import Framework
+import Framework.Types
 
-data ExampleActor2 = ExampleActor2 (Float, Float)
+data ExampleActor2 = ExampleActor2 {
+  pos :: (Float, Float)
+}
 
-instance Actor ExampleActor2 where
-  texturePath = const "resources/fff.jpg"
-  drawFunc (ExampleActor2 pos) = (0.05, pos)
-  updateFunc (ExampleActor2 pos) _ = (ExampleActor2 pos, TestEvent pos)
+init :: ExampleActor2
+init = ExampleActor2 (100, 100)
+
+draw :: ExampleActor2 -> StringPicture
+draw (ExampleActor2 pos) = Draw 0.05 pos "fff"
+
+update :: Float -> ExampleActor2 -> ExampleActor2
+update = const id
+
+handleEvent :: KeyPress -> ExampleActor2 -> ExampleActor2
+handleEvent = const id
 
 -- vim: set ts=2 sw=2 fdm=marker:
