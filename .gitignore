@@ -3,3 +3,6 @@ project.cabal
 *~
 /dist
 /dist-*
+.idea
+project.iml
+
