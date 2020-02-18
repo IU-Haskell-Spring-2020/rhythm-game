@@ -160,9 +160,17 @@ mapEvents (event:events) = outputEvents
 
 mapCode :: SDL.Scancode -> Maybe KeyPress
 mapCode SDL.ScancodeUp = Just KeyUp
+mapCode SDL.ScancodeW = Just KeyUp
+
 mapCode SDL.ScancodeDown = Just KeyDown
+mapCode SDL.ScancodeS = Just KeyDown
+--
 mapCode SDL.ScancodeLeft = Just KeyLeft
+mapCode SDL.ScancodeA = Just KeyLeft
+
 mapCode SDL.ScancodeRight = Just KeyRight
+mapCode SDL.ScancodeD = Just KeyRight
+
 mapCode _ = Nothing
 
 -- | Load images from paths into an array.
