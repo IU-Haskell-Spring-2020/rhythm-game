@@ -2,7 +2,7 @@ module Framework.Runner (
   runWorld
 ) where
 
-import Engine (runSDL, IntPicture, Picture(..))
+import Engine (runSDL, EnginePicture, Picture(..))
 import Framework.Types
 import qualified World
 
@@ -26,7 +26,7 @@ runWorld
 -- Helper functions {{{1
 
 -- | Convert all string pictures into int pictures.
-convertPictures :: (String -> Maybe Int) -> StringPicture -> IntPicture
+convertPictures :: (String -> Maybe Int) -> StringPicture -> EnginePicture
 convertPictures mapper Blank = Blank
 convertPictures mapper (CombinedPicture p1 p2)
   = CombinedPicture (convertPictures mapper p1) (convertPictures mapper p2)

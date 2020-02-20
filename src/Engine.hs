@@ -26,37 +26,13 @@ data Action
   | NoAction
 
 -- | Output picture drawn on the screen.
-data Picture target
-  = Draw Float (Float, Float) target                   -- ^ Draw a picture by its index at coords
-  | CombinedPicture (Picture target) (Picture target)  -- ^ Two output pictures combined
-  | Blank                                              -- ^ No-op picture
+data Picture coords target
+  = Draw Float coords target  -- ^ Draw a picture by its index at coords
+  | CombinedPicture (Picture coords target) (Picture coords target)
+                              -- ^ Two output pictures combined
+  | Blank                     -- ^ No-op picture
 
-type IntPicture = Picture Int
-
-class Combinable a where
-  combine :: a -> a -> a
-
-instance Combinable Action where
-  combine a NoAction = a
-  combine NoAction a = a
-  combine a1 a2 = CombinedAction a1 a2
-
-instance Combinable (Picture a) where
-  combine p Blank = p
-  combine Blank p = p
-  combine p1 p2 = CombinedPicture p1 p2
-
--- | Transated picture
-translated :: (Float, Float) -> Picture a -> Picture a
-translated t (CombinedPicture o1 o2) = CombinedPicture (translated t o1) (translated t o2)
-translated (dx, dy) (Draw s (x, y) i) = Draw s (x + dx, y + dy) i
-translated _ x = x
-
--- | Scaled picture
-scaled :: Float -> Picture a -> Picture a
-scaled s (CombinedPicture o1 o2) = CombinedPicture (scaled s o1) (scaled s o2)
-scaled s (Draw s' p i) = Draw (s * s') p i
-scaled _ x = x
+type EnginePicture = Picture (Float, Float) Int
 
 -- =============================================================================
 -- Generic main function {{{1
@@ -64,7 +40,7 @@ scaled _ x = x
 targetFPS = 60
 
 screenWidth, screenHeight :: CInt
-(screenWidth, screenHeight) = (640, 480)
+(screenWidth, screenHeight) = (600, 600)
 
 runSDL
   -- initialization
@@ -74,7 +50,7 @@ runSDL
   -- loop
   -> (KeyPress -> world -> world)           -- ^ Event handler
   -> (Float -> world -> (world, Action))    -- ^ World updater
-  -> (world -> IntPicture)                  -- ^ World painter
+  -> (world -> EnginePicture)                  -- ^ World painter
   -- output
   -> IO ()
 
@@ -181,7 +157,7 @@ loadImages paths
         output <- action
         return (output:list)
 
-draw :: [SDL.Surface] -> IntPicture -> SDL.Surface -> IO ()
+draw :: [SDL.Surface] -> EnginePicture -> SDL.Surface -> IO ()
 draw textures Blank _ = return ()
 draw textures (CombinedPicture pic1 pic2) target = do
   draw textures pic1 target
@@ -190,10 +166,10 @@ draw textures (Draw s (x, y) i) target = do
   let texture = textures !! i
   (SDL.V2 w h) <- SDL.surfaceDimensions texture
 
-  let targetX = round x :: CInt
-  let targetY = round y :: CInt
   let targetW = round (fromIntegral w * s)
   let targetH = round (fromIntegral h * s)
+  let targetX = (round x - targetW `div` 2 + 300) :: CInt
+  let targetY = (round y - targetH `div` 2 + 300) :: CInt
 
   SDL.surfaceBlitScaled
     (textures !! i)

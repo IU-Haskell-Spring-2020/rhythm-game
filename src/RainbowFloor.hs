@@ -1,6 +1,7 @@
 module RainbowFloor (
   RainbowFloor,
   RainbowFloor.init,
+  textureNames,
   draw,
   update
 ) where
@@ -16,6 +17,9 @@ data RainbowFloor = RainbowFloor {
 
   drawModulo :: Int
 }
+
+textureNames :: [(String, String)]
+textureNames = [("floor", "resources/floor.jpg")]
 
 init :: RainbowFloor
 init = RainbowFloor {
@@ -35,7 +39,7 @@ draw me = foldr combine Blank pics
 
 drawAt :: (Int, Int) -> RainbowFloor -> StringPicture
 drawAt (x, y) me
-  | (x + y) `mod` 2 == modulo = Draw s (drawX, drawY) "fff"
+  | (x + y) `mod` 2 == modulo = Draw s (drawX, drawY) "floor"
   | otherwise                 = Blank
     where
       modulo = drawModulo me
