@@ -5,4 +5,5 @@ project.cabal
 /dist-*
 .idea
 project.iml
+.DS_Store
 
