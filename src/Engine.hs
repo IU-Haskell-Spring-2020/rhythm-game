@@ -11,6 +11,9 @@ import qualified Graphics.Rendering.OpenGL as GL
 import qualified SDL.Image
 import qualified SDL.Mixer
 
+import Math
+import qualified Box
+
 -- =============================================================================
 -- Output interface {{{1
 
@@ -26,13 +29,13 @@ data Action
   | NoAction
 
 -- | Output picture drawn on the screen.
-data Picture coords target
-  = Draw Float coords target  -- ^ Draw a picture by its index at coords
-  | CombinedPicture (Picture coords target) (Picture coords target)
+data Picture target
+  = Draw Box.Box target       -- ^ Draw a picture by its index inside the box
+  | CombinedPicture (Picture target) (Picture target)
                               -- ^ Two output pictures combined
   | Blank                     -- ^ No-op picture
 
-type EnginePicture = Picture (Float, Float) Int
+type EnginePicture = Picture Int
 
 -- =============================================================================
 -- Generic main function {{{1
@@ -40,7 +43,7 @@ type EnginePicture = Picture (Float, Float) Int
 targetFPS = 60
 
 screenWidth, screenHeight :: CInt
-(screenWidth, screenHeight) = (600, 600)
+(screenWidth, screenHeight) = (640, 640)
 
 runSDL
   -- initialization
@@ -162,14 +165,18 @@ draw textures Blank _ = return ()
 draw textures (CombinedPicture pic1 pic2) target = do
   draw textures pic1 target
   draw textures pic2 target
-draw textures (Draw s (x, y) i) target = do
+draw textures (Draw box i) target = do
   let texture = textures !! i
   (SDL.V2 w h) <- SDL.surfaceDimensions texture
 
-  let targetW = round (fromIntegral w * s)
-  let targetH = round (fromIntegral h * s)
-  let targetX = (round x - targetW `div` 2 + 300) :: CInt
-  let targetY = (round y - targetH `div` 2 + 300) :: CInt
+  let (floatTargetW, floatTargetH) = Box.dimensions box
+  let (floatTargetX, floatTargetY) =
+        vSub (Box.position box) (vMul (floatTargetW, floatTargetH) 0.5)
+
+  let targetX = round floatTargetX :: CInt
+  let targetY = round floatTargetY :: CInt
+  let targetW = round floatTargetW :: CInt
+  let targetH = round floatTargetH :: CInt
 
   SDL.surfaceBlitScaled
     (textures !! i)

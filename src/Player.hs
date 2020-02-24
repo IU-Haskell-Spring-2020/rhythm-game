@@ -3,12 +3,18 @@ module Player (
   Player.init,
   update,
   draw,
-  handleEvent
+  handleEvent,
+  currentBox,
+
+  animationTime,
+  lastPosition,
+  position
 ) where
 
 import Framework.Types
 import Grid
 import Math
+import qualified Box
 
 data Player = Player {
   lastPosition :: (Float, Float),
@@ -24,14 +30,18 @@ init = Player {
 }
 
 draw :: Player -> GridPicture
-draw me = translated pos $ scaled scale $ texture "fff"
+draw me = Draw (currentBox me) "fff"
+
+currentBox :: Player -> Box.Box
+currentBox me = myBox
   where
-    scale = 0.4 + 0.1 * max 0.6 (sin (pi * animationTime me / 2))
+    myBox = scaled 0.8 $ scaled scale $ translated pos $ Box.box (128, 128)
 
-    transitionTime = min 1 (sqrt ((1 - animationTime me) * 2))
-
+    transitionTime = min 1 (sqrt ((1 - animationTime me) * 5))
     dPos = vMul (vSub (position me) (lastPosition me)) transitionTime
     pos = vAdd (lastPosition me) dPos
+    scale = 0.4 + 0.2 * max 0.6 (sin (pi * animationTime me / 4))
+
 
 update :: Float -> Player -> Player
 update dt me = me {

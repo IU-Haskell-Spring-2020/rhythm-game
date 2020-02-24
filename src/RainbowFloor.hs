@@ -12,9 +12,6 @@ data RainbowFloor = RainbowFloor {
   width :: Int,
   height :: Int,
 
-  scale :: Float,
-  distance :: Float,
-
   drawModulo :: Int
 }
 
@@ -23,10 +20,8 @@ textureNames = [("floor", "resources/floor.jpg")]
 
 init :: RainbowFloor
 init = RainbowFloor {
-  width = 5,
-  height = 5,
-  scale = 0.1,
-  distance = 70,
+  width = 6,
+  height = 6,
   drawModulo = 0
 }
 
@@ -39,13 +34,12 @@ draw me = foldr combine Blank pics
 
 drawAt :: (Int, Int) -> RainbowFloor -> StringPicture
 drawAt (x, y) me
-  | (x + y) `mod` 2 == modulo = Draw s (drawX, drawY) "floor"
+  | (x + y) `mod` 2 == modulo = pic
   | otherwise                 = Blank
     where
+      pic = translated position $ texture (32, 32) "floor"
+      position = (fromIntegral x, fromIntegral y)
       modulo = drawModulo me
-      drawX = fromIntegral x * distance me
-      drawY = fromIntegral y * distance me
-      s = scale me
 
 update :: Float -> RainbowFloor -> RainbowFloor
 update mslt me

@@ -8,7 +8,6 @@ module World (
 ) where
 
 import Framework.Types
-
 import MeasureTime (scaledMeasureLocalTime)
 import qualified Pacemaker
 import qualified WorldMap
@@ -30,29 +29,34 @@ init = World {
 
 -- | List of texture filenames which are going to be loaded for this world.
 textureNames :: [(String, String)]
-textureNames = Pacemaker.textureNames ++ WorldMap.textureNames
+textureNames = ("clip", "resources/clip.jpg") : Pacemaker.textureNames ++ WorldMap.textureNames
 
 -- | Draw the world from a world state.
 draw :: World -> StringPicture
 draw world
-  = foldr combine Blank ([
-      Pacemaker.draw localDt
-    ] ++ WorldMap.draw (worldMap world))
+  = foldr combine Blank (mapPics ++ [worldClips, Pacemaker.draw localDt])
       where
         localDt = scaledMeasureLocalTime (passedTime world)
+        mapPics = map (translated (320 - 32, 320 - 32)) $ WorldMap.draw (worldMap world)
+
+        -- we need to clip the world so it doesn't go out of the boundaries
+        worldClip = translated (320, 32) $ texture (640, 64) "clip"
+        worldClips = combine worldClip
+          (translated (0, 640 - 64) worldClip)
+
 
 -- | Update the world from a dt.
 update :: Float -> World -> (World, Action)
 update dt world = (
   world {
     passedTime = newPassedTime,
-    worldMap = WorldMap.update dt (worldMap world)
+    worldMap = WorldMap.update dt localDt (worldMap world)
   },
   NoAction
   )
     where
       newPassedTime = passedTime world + dt
-      smlt = scaledMeasureLocalTime (passedTime world)
+      localDt = scaledMeasureLocalTime (passedTime world)
 
 -- | Handle the incoming keypress.
 handleEvent :: KeyPress -> World -> World

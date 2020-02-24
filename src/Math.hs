@@ -10,3 +10,6 @@ vSub (x1, y1) (x2, y2) = (x1 - x2, y1 - y2)
 
 vMul :: V2 -> Float -> V2
 vMul (x, y) a = (x * a, y * a)
+
+vNeg :: V2 -> V2
+vNeg (x, y) = (-x, -y)

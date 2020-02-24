@@ -13,9 +13,9 @@ textureNames :: [(String, String)]
 textureNames = [("fff", "resources/fff.jpg")]
 
 draw :: Float -> StringPicture
-draw localDt = translated (0, 300) pacemaker
+draw localDt = translated (320, 640) pacemaker
   where
-    pacemaker = scaled scale $ texture "fff"
+    pacemaker = scaled scale $ texture (64, 64) "fff"
 
     dt = (localDt `mod'` pace) * (2 / pace)
-    scale = 0.2 * max 0.8 (cos dt)
+    scale = max 0.8 (cos dt)

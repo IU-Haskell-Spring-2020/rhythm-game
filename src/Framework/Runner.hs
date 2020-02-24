@@ -30,9 +30,9 @@ convertPictures :: (String -> Maybe Int) -> StringPicture -> EnginePicture
 convertPictures mapper Blank = Blank
 convertPictures mapper (CombinedPicture p1 p2)
   = CombinedPicture (convertPictures mapper p1) (convertPictures mapper p2)
-convertPictures mapper (Draw s p i)
+convertPictures mapper (Draw box i)
   = case mapper i of
-      Just x -> Draw s p x
+      Just x -> Draw box x
       Nothing -> Blank
 
 -- | Texture paths helper.
