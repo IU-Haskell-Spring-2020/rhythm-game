@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Engine where
+module Framework.Engine where
 
 import Control.Monad
 import Foreign.C.Types
@@ -12,7 +12,6 @@ import qualified SDL.Image
 import qualified SDL.Mixer
 
 import Math
-import qualified Box
 
 -- =============================================================================
 -- Output interface {{{1
@@ -30,10 +29,10 @@ data Action
 
 -- | Output picture drawn on the screen.
 data Picture target
-  = Draw Box.Box target       -- ^ Draw a picture by its index inside the box
+  = Draw Float (Float, Float) target     -- ^ Draw a picture by its index at coords
   | CombinedPicture (Picture target) (Picture target)
-                              -- ^ Two output pictures combined
-  | Blank                     -- ^ No-op picture
+                                         -- ^ Two output pictures combined
+  | Blank                                -- ^ No-op picture
 
 type EnginePicture = Picture Int
 
@@ -165,18 +164,14 @@ draw textures Blank _ = return ()
 draw textures (CombinedPicture pic1 pic2) target = do
   draw textures pic1 target
   draw textures pic2 target
-draw textures (Draw box i) target = do
+draw textures (Draw s (x, y) i) target = do
   let texture = textures !! i
   (SDL.V2 w h) <- SDL.surfaceDimensions texture
 
-  let (floatTargetW, floatTargetH) = Box.dimensions box
-  let (floatTargetX, floatTargetY) =
-        vSub (Box.position box) (vMul (floatTargetW, floatTargetH) 0.5)
-
-  let targetX = round floatTargetX :: CInt
-  let targetY = round floatTargetY :: CInt
-  let targetW = round floatTargetW :: CInt
-  let targetH = round floatTargetH :: CInt
+  let targetW = round (fromIntegral w * s)
+  let targetH = round (fromIntegral h * s)
+  let targetX = (round x - targetW `div` 2) :: CInt
+  let targetY = (round y - targetH `div` 2) :: CInt
 
   SDL.surfaceBlitScaled
     (textures !! i)

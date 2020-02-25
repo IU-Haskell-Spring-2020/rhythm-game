@@ -2,10 +2,11 @@ module MeasureTime (scaledMeasureLocalTime) where
 
 import Data.Fixed
 
+offsetSeconds = 0.27
 offsetMeasures = 0
 bpm = 98
 secondsPerMeasure = 60 / (bpm / 4)
-localTime dt = (dt - offsetMeasures * secondsPerMeasure) `mod'` secondsPerMeasure
+localTime dt = (dt - offsetMeasures * secondsPerMeasure + offsetSeconds) `mod'` secondsPerMeasure
 scaledLocalTime dt = localTime dt / secondsPerMeasure
 
 -- | Scaled local time inside a measure (4 quarter notes).

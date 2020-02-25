@@ -2,9 +2,13 @@ module Framework.Runner (
   runWorld
 ) where
 
-import Engine (runSDL, EnginePicture, Picture(..))
+import Framework.Engine (runSDL, EnginePicture, Picture(..))
 import Framework.Types
-import qualified World
+
+import Types
+import Render.World
+import Update.World
+import HandleEvent.World
 
 -- =============================================================================
 -- Public API {{{1
@@ -13,14 +17,19 @@ import qualified World
 runWorld :: IO ()
 runWorld
   = runSDL
-      World.init
+      initWorld
       texturePaths
       "resources/scattered-and-lost.ogg"
-      World.handleEvent
-      World.update
-      (convertPictures textureId . World.draw)
+      handleEventWorld
+      updateWorld
+      (convertPictures textureId . renderWorld)
         where
-          (texturePaths, textureId) = parseTextureNames World.textureNames
+          (texturePaths, textureId) = parseTextureNames [
+            ("floor", "resources/floor.jpg"),
+            ("fff", "resources/fff.jpg"),
+            ("fff_red", "resources/fff_red.jpg"),
+            ("clip", "resources/clip.jpg")
+            ]
 
 -- =============================================================================
 -- Helper functions {{{1
@@ -30,9 +39,9 @@ convertPictures :: (String -> Maybe Int) -> StringPicture -> EnginePicture
 convertPictures mapper Blank = Blank
 convertPictures mapper (CombinedPicture p1 p2)
   = CombinedPicture (convertPictures mapper p1) (convertPictures mapper p2)
-convertPictures mapper (Draw box i)
+convertPictures mapper (Draw scale pos i)
   = case mapper i of
-      Just x -> Draw box x
+      Just x -> Draw scale pos x
       Nothing -> Blank
 
 -- | Texture paths helper.

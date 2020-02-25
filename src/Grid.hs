@@ -1,7 +1,6 @@
 module Grid where
 
 import Framework.Types
-import Box
 
 gridSize = 64
 
@@ -15,4 +14,4 @@ gridToWorld (x, y) = (gridSize * x + gridSize / 2, gridSize * y + gridSize / 2)
 gridPicToWorldPic :: GridPicture -> StringPicture
 gridPicToWorldPic = unwrapMapPicture mapper
   where
-    mapper box = Draw (box { position = gridToWorld (position box) })
+    mapper scale pos = Draw scale (gridToWorld pos)
