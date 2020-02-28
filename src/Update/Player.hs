@@ -3,6 +3,7 @@ module Update.Player where
 import Data.Fixed
 import Types.Player
 import Types.SmoothPosition
+import Update.SmoothPosition
 
 updatePlayer :: Float -> Float -> Player -> Player
 updatePlayer dt localDt =
@@ -10,9 +11,7 @@ updatePlayer dt localDt =
 
 updatePlayerAnimationTime :: Float -> Player -> Player
 updatePlayerAnimationTime dt me = me {
-  playerPosition = (playerPosition me) {
-    smoothPositionTime = max 0 (smoothPositionTime (playerPosition me) - dt)
-  },
+  playerPosition = updateSmoothPosition (playerPosition me) (max 0 (smoothPositionTime (playerPosition me) - dt)),
   playerErrorTime = max 0 (playerErrorTime me - dt)
 }
 
