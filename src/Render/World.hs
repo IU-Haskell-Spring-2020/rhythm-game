@@ -1,7 +1,7 @@
 module Render.World where
 
 import Framework.Types
-import Types
+import Types.World
 import MeasureTime
 
 import Render.Map

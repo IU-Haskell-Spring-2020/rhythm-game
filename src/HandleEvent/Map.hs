@@ -1,7 +1,7 @@
 module HandleEvent.Map where
 
 import Framework.Types
-import Types
+import Types.WorldMap
 
 import HandleEvent.Player
 

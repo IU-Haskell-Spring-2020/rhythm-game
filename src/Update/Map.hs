@@ -1,6 +1,7 @@
 module Update.Map where
 
-import Types
+import Types.WorldMap
+
 import Update.Player
 import Interactions
 

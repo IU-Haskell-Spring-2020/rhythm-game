@@ -5,7 +5,7 @@ module Framework.Runner (
 import Framework.Engine (runSDL, EnginePicture, Picture(..))
 import Framework.Types
 
-import Types
+import Types.World
 import Render.World
 import Update.World
 import HandleEvent.World
