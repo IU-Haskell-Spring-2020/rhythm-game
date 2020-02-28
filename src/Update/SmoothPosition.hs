@@ -2,11 +2,11 @@ module Update.SmoothPosition where
 
 import Types.SmoothPosition
 
-updateSmoothPosition 
+updateSmoothPosition
   :: SmoothPosition
   -> Float
   -> SmoothPosition
-updateSmoothPosition currentPosition newTime
-  = currentPosition {
-    smoothPositionTime = newTime
-  } 
+updateSmoothPosition pos dt =
+  pos {
+    smoothPositionTime = max 0 (smoothPositionTime pos - dt)
+  }

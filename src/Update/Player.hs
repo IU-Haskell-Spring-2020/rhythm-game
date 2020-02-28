@@ -11,7 +11,7 @@ updatePlayer dt localDt =
 
 updatePlayerAnimationTime :: Float -> Player -> Player
 updatePlayerAnimationTime dt me = me {
-  playerPosition = updateSmoothPosition (playerPosition me) (max 0 (smoothPositionTime (playerPosition me) - dt)),
+  playerPosition = updateSmoothPosition (playerPosition me) dt,
   playerErrorTime = max 0 (playerErrorTime me - dt)
 }
 
