@@ -14,13 +14,8 @@ updatePlayerInteractions :: Map -> Player
 updatePlayerInteractions map = if shouldSwitch then newPlayer else currentPlayer
   where
     currentPlayer = mapPlayer map
-    playerSmoothPosition = playerPosition currentPlayer
-    playerSmoothPositionNew = playerSmoothPosition {
-      smoothPositionCurrent = smoothPositionPrevious playerSmoothPosition,
-      smoothPositionPrevious = smoothPositionCurrent playerSmoothPosition
-    }
     newPlayer = currentPlayer {
-      playerPosition = playerSmoothPositionNew
+      playerPosition = swapSmoothPosition (playerPosition currentPlayer)
     }
 
     currentPlayerPosition = playerPosition currentPlayer

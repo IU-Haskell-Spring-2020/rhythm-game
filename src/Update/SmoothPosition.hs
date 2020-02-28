@@ -10,5 +10,3 @@ updateSmoothPosition currentPosition newTime
   = currentPosition {
     smoothPositionTime = newTime
   } 
-
-  

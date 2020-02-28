@@ -22,4 +22,11 @@ currentSmoothPosition pos = currentPosition
     dPos = vMul (vSub (smoothPositionCurrent pos) (smoothPositionPrevious pos)) transitionTime
     currentPosition = vAdd (smoothPositionPrevious pos) dPos
     
+swapSmoothPosition :: SmoothPosition -> SmoothPosition
+swapSmoothPosition old = 
+  old {
+    smoothPositionPrevious = smoothPositionCurrent old,
+    smoothPositionCurrent = smoothPositionPrevious old
+  }
+    
 
