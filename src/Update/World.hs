@@ -2,7 +2,7 @@ module Update.World where
 
 import Framework.Types
 import MeasureTime
-import Types
+import Types.World
 
 import Update.Map
 

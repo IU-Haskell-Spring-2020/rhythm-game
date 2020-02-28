@@ -141,7 +141,7 @@ mapCode SDL.ScancodeW = Just KeyUp
 
 mapCode SDL.ScancodeDown = Just KeyDown
 mapCode SDL.ScancodeS = Just KeyDown
---
+
 mapCode SDL.ScancodeLeft = Just KeyLeft
 mapCode SDL.ScancodeA = Just KeyLeft
 
