@@ -1,13 +1,14 @@
 module Types.Projectile where
 
 import Types.SmoothPosition
+import Types.Direction
+
 import Math
 
-data ProjectileDirection = Up | Down | Left | Right | None deriving Eq
 
 data Projectile = Projectile {
   projectilePosition :: SmoothPosition,
-  projectileDirection :: ProjectileDirection,
+  projectileDirection :: Direction,
   projectileMoved :: Bool
 }
 
@@ -25,8 +26,8 @@ initProjectileTowards position towards
       extractDirection (x, y)
         | x == 0 && y > 0 = Just Down
         | x == 0 && y < 0 = Just Up
-        | x < 0 && y == 0 = Just Types.Projectile.Left
-        | x > 0 && y == 0 = Just Types.Projectile.Right
+        | x < 0 && y == 0 = Just Types.Direction.Left
+        | x > 0 && y == 0 = Just Types.Direction.Right
         | otherwise       = Nothing
 
       replaceDirection direction = (initDefaultProjectile position) {
