@@ -8,11 +8,11 @@ import MeasureTime
 
 import Render.Map
 import Render.Pacemaker
-import Render.ItemHUD
+import Render.ItemsHUD
 
 renderWorld :: World -> StringPicture
 renderWorld world
-  = foldr combine Blank (mapPics ++ [worldClips, renderPacemaker localDt, itemHUD])
+  = foldr combine Blank (mapPics ++ [worldClips, renderPacemaker localDt, itemsHUD])
       where
         localDt = scaledMeasureLocalTime (worldPassedTime world) (worldTimeScale world)
         mapPics = map (translated (320 - 32, 320 - 32)) $ renderMap (worldMap world)
@@ -23,4 +23,4 @@ renderWorld world
           (translated (0, 640 - 64) worldClip)
 
         -- rendering the HUDs
-        itemHUD = renderItemHUD (playerItems $ mapPlayer $ worldMap world)
+        itemsHUD = renderItemsHUD (playerItems $ mapPlayer $ worldMap world)

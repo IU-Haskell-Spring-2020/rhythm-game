@@ -1,12 +1,12 @@
-module Render.ItemHUD where
+module Render.ItemsHUD where
 
 import Framework.Types
 import Types.Items
 import Render.ItemTile
 import Grid
 
-renderItemHUD :: Items -> StringPicture
-renderItemHUD items = gridPicToWorldPic $ foldr combine Blank itemPictures
+renderItemsHUD :: Items -> StringPicture
+renderItemsHUD items = gridPicToWorldPic $ foldr combine Blank itemPictures
   where
     itemPictures = map renderItemTile itemTiles
     itemTiles = zipWith makeItemTile [0..] items
