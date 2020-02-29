@@ -3,6 +3,7 @@ module Interactions where
 import Data.List
 import Data.Maybe
 
+import Types.Character
 import Types.WorldMap
 import Types.Player
 import Types.SmoothPosition
@@ -24,13 +25,15 @@ updatePlayerCollisionInteractions map = map {
   where
     currentPlayer = mapPlayer map
     newPlayer = currentPlayer {
-      playerPosition = swapSmoothPosition (playerPosition currentPlayer)
+      playerCharacter = (playerCharacter currentPlayer) {
+        characterPosition = (swapSmoothPosition . characterPosition . playerCharacter) currentPlayer
+      }
     }
 
-    currentPlayerPosition = playerPosition currentPlayer
+    currentPlayerPosition = characterPosition . playerCharacter $ currentPlayer
 
     -- TODO: this code is really full of magic numbers
-    shouldSwitch = colliding && (smoothPositionTime (playerPosition currentPlayer) < 0.95)
+    shouldSwitch = colliding && (smoothPositionTime ((characterPosition . playerCharacter) currentPlayer) < 0.95)
 
     -- | Write first, optimize later :)
     colliding = not (any isTileSameAsPlayer $ mapFloorTiles map)
@@ -43,7 +46,7 @@ updatePlayerItemInteractions map = map {
 }
   where
     currentPlayer = mapPlayer map
-    currentPlayerPosition = smoothPositionCurrent (playerPosition currentPlayer)
+    currentPlayerPosition = smoothPositionCurrent (characterPosition $ playerCharacter currentPlayer)
     isItemAtMyPosition (ItemTile itemPos _) = itemPos == currentPlayerPosition
     itemName (ItemTile _ name) = name
 

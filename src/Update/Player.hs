@@ -2,6 +2,7 @@ module Update.Player where
 
 import Data.Fixed
 import Types.Player
+import Types.Character
 import Types.SmoothPosition
 import Update.SmoothPosition
 
@@ -11,22 +12,30 @@ updatePlayer dt localDt =
 
 updatePlayerAnimationTime :: Float -> Player -> Player
 updatePlayerAnimationTime dt me = me {
-  playerPosition = updateSmoothPosition (playerPosition me) dt,
-  playerErrorTime = max 0 (playerErrorTime me - dt)
+  playerCharacter = (playerCharacter me) {
+    characterPosition = 
+      updateSmoothPosition (characterPosition $ playerCharacter me) dt,
+    characterDamageAnimationTime =
+      max 0 (characterDamageAnimationTime (playerCharacter me) - dt)
+  }
 }
 
 updatePlayerMovementLimitations :: Float -> Player -> Player
 updatePlayerMovementLimitations localDt me = newMe
   where
-    decider = (playerCanMoveAt localDt, playerMoved me)
-    newMe = case decider of
-              (True, False) -> me {
-                playerCanMove = True
-              }
-              (False, True) -> me {
-                playerMoved = False
-              }
-              _ -> me
+    playerMoved = characterMoved (playerCharacter me)
+    newMe
+      | playerCanMoveAt localDt && not playerMoved
+        = me {
+          playerCanMove = True
+        }
+      | not (playerCanMoveAt localDt) && playerMoved
+        = me {
+          playerCharacter = (playerCharacter me) {
+            characterMoved = False
+          }
+        }
+      | otherwise = me
 
 playerCanMoveAt :: Float -> Bool
 playerCanMoveAt localDt = abs dt < leeway
