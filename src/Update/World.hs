@@ -16,4 +16,5 @@ updateWorld dt world = (
   )
     where
       newPassedTime = worldPassedTime world + dt
-      localDt = scaledMeasureLocalTime (worldPassedTime world)
+      localDt = scaledMeasureLocalTime (worldPassedTime world) timeScale
+      timeScale = worldTimeScale world

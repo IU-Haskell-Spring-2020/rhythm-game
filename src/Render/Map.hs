@@ -10,13 +10,15 @@ import Math
 import Grid
 
 import Render.FloorTile
+import Render.ItemTile
 import Render.Player
 
 renderMap :: Map -> [StringPicture]
 renderMap me = pic
     where
-      cameraOffset = vNeg $ smoothPositionCurrent (playerPosition (mapPlayer me))
+      cameraOffset = vNeg $ currentSmoothPosition (playerPosition (mapPlayer me))
       pic = map (gridPicToWorldPic . translated cameraOffset) (
         map renderFloorTile (mapFloorTiles me)
+        ++ map renderItemTile (mapItemTiles me)
         ++ [ renderPlayer (mapPlayer me) ]
         )

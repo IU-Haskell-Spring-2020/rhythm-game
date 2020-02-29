@@ -1,6 +1,7 @@
 module Types.Player where
 
 import Types.SmoothPosition
+import Types.Items
 import Math
 
 data Player = Player {
@@ -8,7 +9,9 @@ data Player = Player {
 
   playerCanMove :: Bool,
   playerMoved :: Bool,
-  playerErrorTime :: Float
+  playerErrorTime :: Float,
+
+  playerItems :: Items
 }
 
 initPlayer :: Player
@@ -17,9 +20,15 @@ initPlayer = Player {
 
   playerCanMove = False,
   playerMoved = False,
-  playerErrorTime = 0
+  playerErrorTime = 0,
+
+  playerItems = []
 }
 
 playerCurrentPosition :: Player -> (Float, Float)
 playerCurrentPosition me = currentSmoothPosition (playerPosition me)
 
+playerAddItem :: Player -> String -> Player
+playerAddItem me item = me {
+  playerItems = addItem item (playerItems me)
+}
