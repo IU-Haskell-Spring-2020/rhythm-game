@@ -28,7 +28,12 @@ runWorld
             ("floor", "resources/floor.jpg"),
             ("fff", "resources/fff.jpg"),
             ("fff_red", "resources/fff_red.jpg"),
-            ("clip", "resources/clip.jpg")
+            ("clip", "resources/clip.jpg"),
+
+            ("projectile_left", "resources/projectile_left.png"),
+            ("projectile_right", "resources/projectile_right.png"),
+            ("projectile_up", "resources/projectile_up.png"),
+            ("projectile_down", "resources/projectile_down.png")
             ]
 
 -- =============================================================================
