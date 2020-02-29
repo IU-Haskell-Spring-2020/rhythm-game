@@ -22,13 +22,6 @@ initSmoothPositionAt coords = SmoothPosition {
   smoothPositionTime = 0
 }
 
-initSmoothPositionAt :: (Float, Float) -> SmoothPosition
-initSmoothPositionAt coords = SmoothPosition {
-  smoothPositionPrevious = coords,
-  smoothPositionCurrent = coords,
-  smoothPositionTime = 0
-}
-
 currentSmoothPosition :: SmoothPosition -> (Float, Float)
 currentSmoothPosition pos = currentPosition
   where
