@@ -13,23 +13,29 @@ updatePlayer dt localDt =
 updatePlayerAnimationTime :: Float -> Player -> Player
 updatePlayerAnimationTime dt me = me {
   playerCharacter = (playerCharacter me) {
-    characterPosition = updateSmoothPosition (characterPosition $ playerCharacter me) dt,
-    characterDamageAnimationTime = 
-  },
+    characterPosition = 
+      updateSmoothPosition (characterPosition $ playerCharacter me) dt,
+    characterDamageAnimationTime =
+      max 0 (characterDamageAnimationTime (playerCharacter me) - dt)
+  }
 }
 
 updatePlayerMovementLimitations :: Float -> Player -> Player
 updatePlayerMovementLimitations localDt me = newMe
   where
-    decider = (playerCanMoveAt localDt, playerMoved me)
-    newMe = case decider of
-              (True, False) -> me {
-                playerCanMove = True
-              }
-              (False, True) -> me {
-                playerMoved = False
-              }
-              _ -> me
+    playerMoved = characterMoved (playerCharacter me)
+    newMe
+      | playerCanMoveAt localDt && not playerMoved
+        = me {
+          playerCanMove = True
+        }
+      | not (playerCanMoveAt localDt) && playerMoved
+        = me {
+          playerCharacter = (playerCharacter me) {
+            characterMoved = False
+          }
+        }
+      | otherwise = me
 
 playerCanMoveAt :: Float -> Bool
 playerCanMoveAt localDt = abs dt < leeway

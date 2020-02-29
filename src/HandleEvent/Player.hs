@@ -3,6 +3,7 @@ module HandleEvent.Player where
 import Framework.Types
 import Math
 
+import Types.Character
 import Types.Player
 import Types.SmoothPosition
 
@@ -14,19 +15,25 @@ playerKeyVector KeyRight = (1, 0)
 
 handleEventPlayer :: KeyPress -> Player -> Player
 handleEventPlayer key me = if playerCanMove me then movePlayer key me else me {
-  playerErrorTime = 0.2
+  playerCharacter = (playerCharacter me) {
+    characterDamageAnimationTime = 0.2
+  }
 }
 
 movePlayer :: KeyPress -> Player -> Player
 movePlayer key me = me {
-  playerPosition = playerNewPosition,
-  playerCanMove = False,
-  playerMoved = True
+  playerCharacter = (playerCharacter me) {
+    characterPosition = playerNewPosition,
+    characterMoved = True
+  },
+  playerCanMove = False
 }
   where
-    playerLastPosition = playerPosition me
+    playerLastPosition = characterPosition (playerCharacter me)
     playerNewPosition = playerLastPosition {
       smoothPositionPrevious = smoothPositionCurrent playerLastPosition,
-      smoothPositionCurrent = vAdd (smoothPositionCurrent playerLastPosition) (playerKeyVector key),
+      smoothPositionCurrent = vAdd 
+          (smoothPositionCurrent playerLastPosition)
+          (playerKeyVector key),
       smoothPositionTime = 1
     }
