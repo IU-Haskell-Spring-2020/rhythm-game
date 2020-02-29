@@ -29,11 +29,11 @@ runWorld
             ("fff", "resources/fff.jpg"),
             ("fff_red", "resources/fff_red.jpg"),
             ("clip", "resources/clip.jpg"),
-
             ("projectile_left", "resources/projectile_left.png"),
             ("projectile_right", "resources/projectile_right.png"),
             ("projectile_up", "resources/projectile_up.png"),
-            ("projectile_down", "resources/projectile_down.png")
+            ("projectile_down", "resources/projectile_down.png"),
+            ("item_beatSlowdown", "resources/item_beatSlowdown.png")
             ]
 
 -- =============================================================================
@@ -53,7 +53,7 @@ convertPictures mapper (Draw scale pos i)
 -- | Receives a list of pairs - mapping from texture name to its path,
 -- | and returns a path list together with a mapping function from name to index.
 parseTextureNames :: [(String, String)] -> ([String], String -> Maybe Int)
-parseTextureNames [] = ([], const Nothing)
+parseTextureNames [] = ([], \name -> error ("wrong texture name: " ++ name))
 parseTextureNames ((name, path):others)
   = (path:paths, newMapper)
     where

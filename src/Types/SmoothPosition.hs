@@ -3,16 +3,23 @@ module Types.SmoothPosition where
 import Math
 
 data SmoothPosition = SmoothPosition {
-    smoothPositionPrevious :: (Float, Float),
-    smoothPositionCurrent :: (Float, Float),
-    smoothPositionTime :: Float
+  smoothPositionPrevious :: (Float, Float),
+  smoothPositionCurrent :: (Float, Float),
+  smoothPositionTime :: Float
 }
 
 initSmoothPosition :: SmoothPosition
 initSmoothPosition = SmoothPosition {
-    smoothPositionPrevious = (0, 0),
-    smoothPositionCurrent = (0, 0),
-    smoothPositionTime = 0
+  smoothPositionPrevious = (0, 0),
+  smoothPositionCurrent = (0, 0),
+  smoothPositionTime = 0
+}
+
+initSmoothPositionAt :: (Float, Float) -> SmoothPosition
+initSmoothPositionAt coords = SmoothPosition {
+  smoothPositionPrevious = coords,
+  smoothPositionCurrent = coords,
+  smoothPositionTime = 0
 }
 
 initSmoothPositionAt :: (Float, Float) -> SmoothPosition

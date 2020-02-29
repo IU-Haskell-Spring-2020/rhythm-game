@@ -10,6 +10,7 @@ import Math
 import Grid
 
 import Render.FloorTile
+import Render.ItemTile
 import Render.Player
 import Render.Projectile
 
@@ -20,5 +21,6 @@ renderMap me = pic
       pic = map (gridPicToWorldPic . translated cameraOffset) (
         map renderFloorTile (mapFloorTiles me)
         ++ map renderProjectile (mapProjectiles me)
+        ++ map renderItemTile (mapItemTiles me)
         ++ [ renderPlayer (mapPlayer me) ]
         )
