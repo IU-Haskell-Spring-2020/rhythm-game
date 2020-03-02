@@ -2,6 +2,8 @@ module Types.SmoothPosition where
 
 import Math
 
+🥳 :: 🔪 -> 💻 -> 🏖
+
 data SmoothPosition = SmoothPosition {
   smoothPositionPrevious :: (Float, Float),
   smoothPositionCurrent :: (Float, Float),

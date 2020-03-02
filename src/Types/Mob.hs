@@ -1,20 +1,18 @@
 module Types.Mob where
 
+import Types.Direction
 import Types.Character
 import Types.SmoothPosition
 
-data MobDirection = Up | Down | Left | Right | None 
-  deriving Eq
-
 data Mob = Mob {
   mobCharacter :: Character,
-  mobDirection :: MobDirection
+  mobDirection :: Direction
 }
 
-initMob :: (Float, Float) -> Mob
-initMob position = Mob {
+initDefaultMob :: (Float, Float) -> Mob
+initDefaultMob position = Mob {
   mobCharacter = initCharacter position,
-  mobDirection = Down
+  mobDirection = None
 }
 
 mobCurrentPosition :: Mob -> (Float, Float)
