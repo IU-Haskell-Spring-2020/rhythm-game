@@ -3,15 +3,19 @@ module Interactions where
 import Data.List
 import Data.Maybe
 
+import Math
+
+import Types.Direction
 import Types.Character
 import Types.WorldMap
 import Types.Player
 import Types.SmoothPosition
 import Types.FloorTile
 import Types.Items
+import Types.Mob
 
 updateInteractions :: Map -> Map
-updateInteractions = updatePlayerInteractions
+updateInteractions = updateMobInteractions . updatePlayerInteractions
 
 updatePlayerInteractions :: Map -> Map
 updatePlayerInteractions
@@ -20,7 +24,8 @@ updatePlayerInteractions
 
 updatePlayerCollisionInteractions :: Map -> Map
 updatePlayerCollisionInteractions map = map {
-  mapPlayer = if shouldSwitch then newPlayer else currentPlayer
+  mapPlayer = if shouldSwitch then newPlayer else currentPlayer,
+  mapMobs = Prelude.map updateMob $ mapMobs map
 }
   where
     currentPlayer = mapPlayer map
@@ -36,8 +41,18 @@ updatePlayerCollisionInteractions map = map {
     shouldSwitch = colliding && (smoothPositionTime ((characterPosition . playerCharacter) currentPlayer) < 0.95)
 
     -- | Write first, optimize later :)
-    colliding = not (any isTileSameAsPlayer $ mapFloorTiles map)
-    isTileSameAsPlayer tile = floorTilePosition tile == smoothPositionCurrent currentPlayerPosition
+    colliding
+      =  not (any positionSameAsPlayer $ Prelude.map floorTilePosition $ mapFloorTiles map)
+      || not (null collidingMobs)
+    positionSameAsPlayer = (== smoothPositionCurrent currentPlayerPosition)
+
+    collidingMobs
+      = filter positionSameAsPlayer
+      $ Prelude.map mobGridPosition
+      $ mapMobs map
+    updateMob mob
+      | positionSameAsPlayer $ mobGridPosition mob = killMob mob
+      | otherwise                                    = mob
 
 updatePlayerItemInteractions :: Map -> Map
 updatePlayerItemInteractions map = map {
@@ -57,3 +72,17 @@ updatePlayerItemInteractions map = map {
 
     -- removing the items from this tile
     newMapItemTiles = filter (not . isItemAtMyPosition) (mapItemTiles map)
+
+updateMobInteractions :: Map -> Map
+updateMobInteractions me = me {
+  mapMobs = map (updateMobInteraction me) (mapMobs me)
+}
+
+updateMobInteraction :: Map -> Mob -> Mob
+updateMobInteraction map me = me {
+  mobDirection
+    = estimateDirection
+        (vSub
+          (playerGridPosition $ mapPlayer map)
+          (mobGridPosition me))
+}

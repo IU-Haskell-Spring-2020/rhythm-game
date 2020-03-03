@@ -24,7 +24,7 @@ movePlayer :: KeyPress -> Player -> Player
 movePlayer key me = me {
   playerCharacter = (playerCharacter me) {
     characterPosition = playerNewPosition,
-    characterMoved = True
+    characterWaitBeats = 1
   },
   playerCanMove = False
 }

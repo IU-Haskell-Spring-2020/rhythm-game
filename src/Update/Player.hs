@@ -23,7 +23,7 @@ updatePlayerAnimationTime dt me = me {
 updatePlayerMovementLimitations :: Float -> Player -> Player
 updatePlayerMovementLimitations localDt me = newMe
   where
-    playerMoved = characterMoved (playerCharacter me)
+    playerMoved = not $ characterCanMove $ playerCharacter me
     newMe
       | playerCanMoveAt localDt && not playerMoved
         = me {
@@ -32,7 +32,7 @@ updatePlayerMovementLimitations localDt me = newMe
       | not (playerCanMoveAt localDt) && playerMoved
         = me {
           playerCharacter = (playerCharacter me) {
-            characterMoved = False
+            characterWaitBeats = 0
           }
         }
       | otherwise = me

@@ -6,18 +6,28 @@ import Types.SmoothPosition
 
 data Mob = Mob {
   mobCharacter :: Character,
-  mobDirection :: Direction
+  mobDirection :: Direction,
+  mobShouldDie :: Bool
 }
 
 initDefaultMob :: (Float, Float) -> Mob
 initDefaultMob position = Mob {
   mobCharacter = initCharacter position,
-  mobDirection = None
+  mobDirection = Types.Direction.Left,
+  mobShouldDie = False
 }
 
-mobCurrentPosition :: Mob -> (Float, Float)
-mobCurrentPosition mob =
-  currentSmoothPosition
-  $ characterPosition
-  $ mobCharacter mob
+mobDisplayPosition :: Mob -> (Float, Float)
+mobDisplayPosition
+  = intermediateSmoothPosition
+  . characterPosition
+  . mobCharacter
 
+mobGridPosition :: Mob -> (Float, Float)
+mobGridPosition
+  = smoothPositionCurrent
+  . characterPosition
+  . mobCharacter
+
+killMob :: Mob -> Mob
+killMob me = me { mobShouldDie = True }

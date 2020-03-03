@@ -8,7 +8,7 @@ import Types.SmoothPosition
 renderPlayer :: Player -> StringPicture
 renderPlayer me
   = scaled (playerCurrentScale me * 0.8)
-  $ translated (playerCurrentPosition me) pic
+  $ translated (playerDisplayPosition me) pic
     where
       pic = texture $
        if characterDamageAnimationTime (playerCharacter me) > 0 

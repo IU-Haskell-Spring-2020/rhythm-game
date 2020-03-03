@@ -33,7 +33,8 @@ runWorld
             ("projectile_right", "resources/projectile_right.png"),
             ("projectile_up", "resources/projectile_up.png"),
             ("projectile_down", "resources/projectile_down.png"),
-            ("item_beatSlowdown", "resources/item_beatSlowdown.png")
+            ("item_beatSlowdown", "resources/item_beatSlowdown.png"),
+            ("mob", "resources/mob.png")
             ]
 
 -- =============================================================================

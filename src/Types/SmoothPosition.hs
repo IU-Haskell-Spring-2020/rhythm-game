@@ -2,8 +2,6 @@ module Types.SmoothPosition where
 
 import Math
 
-🥳 :: 🔪 -> 💻 -> 🏖
-
 data SmoothPosition = SmoothPosition {
   smoothPositionPrevious :: (Float, Float),
   smoothPositionCurrent :: (Float, Float),
@@ -24,18 +22,24 @@ initSmoothPositionAt coords = SmoothPosition {
   smoothPositionTime = 0
 }
 
-currentSmoothPosition :: SmoothPosition -> (Float, Float)
-currentSmoothPosition pos = currentPosition
+intermediateSmoothPosition :: SmoothPosition -> (Float, Float)
+intermediateSmoothPosition pos = currentPosition
   where
     transitionTime = min 1 (sqrt ((1 - smoothPositionTime pos) * 5))
     dPos = vMul (vSub (smoothPositionCurrent pos) (smoothPositionPrevious pos)) transitionTime
     currentPosition = vAdd (smoothPositionPrevious pos) dPos
 
 swapSmoothPosition :: SmoothPosition -> SmoothPosition
-swapSmoothPosition old = 
+swapSmoothPosition old =
   old {
     smoothPositionPrevious = smoothPositionCurrent old,
     smoothPositionCurrent = smoothPositionPrevious old
   }
 
+moveSmoothPosition :: (Float, Float) -> SmoothPosition -> SmoothPosition
+moveSmoothPosition towards me = me {
+  smoothPositionPrevious = smoothPositionCurrent me,
+  smoothPositionCurrent = vAdd (smoothPositionCurrent me) towards,
+  smoothPositionTime = 1
+}
 

@@ -9,7 +9,7 @@ import Types.SmoothPosition
 renderProjectile :: Projectile -> GridPicture
 renderProjectile me = translated currentPosition $ texture name
   where
-    currentPosition = currentSmoothPosition (projectilePosition me)
+    currentPosition = intermediateSmoothPosition $ projectilePosition me
     name
       | projectileDirection me == Types.Direction.Left  = "projectile_left"
       | projectileDirection me == Types.Direction.Right = "projectile_right"

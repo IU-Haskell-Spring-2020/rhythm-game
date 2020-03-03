@@ -18,8 +18,11 @@ initPlayer = Player {
   playerItems = []
 }
 
-playerCurrentPosition :: Player -> (Float, Float)
-playerCurrentPosition me = currentSmoothPosition (characterPosition (playerCharacter me))
+playerDisplayPosition :: Player -> (Float, Float)
+playerDisplayPosition = intermediateSmoothPosition . characterPosition . playerCharacter
+
+playerGridPosition :: Player -> (Float, Float)
+playerGridPosition = smoothPositionCurrent . characterPosition . playerCharacter
 
 playerAddItem :: Player -> String -> Player
 playerAddItem me item = me {
