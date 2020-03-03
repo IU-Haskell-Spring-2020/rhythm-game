@@ -26,6 +26,7 @@ dependencies:
 - sdl2-image
 - sdl2-mixer
 - OpenGL == 3.0.3.0
+- random
 
 library:
   source-dirs: src

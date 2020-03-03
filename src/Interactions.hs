@@ -3,6 +3,7 @@ module Interactions where
 import Data.List
 import Data.Maybe
 
+import Framework.Types
 import Math
 
 import Types.Direction
@@ -14,8 +15,11 @@ import Types.FloorTile
 import Types.Items
 import Types.Mob
 
-updateInteractions :: Map -> Map
-updateInteractions = updateMobInteractions . updatePlayerInteractions
+updateInteractions :: Map -> (Map, Action)
+updateInteractions map0 = (map2, action)
+  where
+    (map1, action) = updateMobInteractions map0
+    map2 = updatePlayerInteractions map1
 
 updatePlayerInteractions :: Map -> Map
 updatePlayerInteractions
@@ -73,16 +77,51 @@ updatePlayerItemInteractions map = map {
     -- removing the items from this tile
     newMapItemTiles = filter (not . isItemAtMyPosition) (mapItemTiles map)
 
-updateMobInteractions :: Map -> Map
-updateMobInteractions me = me {
-  mapMobs = map (updateMobInteraction me) (mapMobs me)
-}
+updateMobInteractions :: Map -> (Map, Action)
+updateMobInteractions me = (
+    me {
+      mapMobs = newMobs,
+      mapPlayer = (mapPlayer me) {
+        playerCharacter = (playerCharacter $ mapPlayer me) {
+          characterDamageAnimationTime
+            = if or playerCollisions
+                 then 0.25
+                 else characterDamageAnimationTime $ playerCharacter $ mapPlayer me
+        }
+      }
+    },
+    if or playerCollisions
+       then PlayOooEffect
+       else NoAction
+  )
+  where
+    (newMobs, playerCollisions) = unzip $ map (updateMobInteraction me) (mapMobs me)
 
-updateMobInteraction :: Map -> Mob -> Mob
-updateMobInteraction map me = me {
-  mobDirection
-    = estimateDirection
-        (vSub
-          (playerGridPosition $ mapPlayer map)
-          (mobGridPosition me))
-}
+updateMobInteraction :: Map -> Mob -> (Mob, Bool)
+updateMobInteraction map me = (newMob, playerCollision)
+  where
+    newMob = me {
+      mobDirection
+        = estimateDirection
+            (vSub
+              (playerGridPosition $ mapPlayer map)
+              (mobGridPosition me)),
+      mobCharacter = (mobCharacter me) {
+        characterPosition
+          = if playerCollision
+               then swapSmoothPosition $ characterPosition $ mobCharacter me
+               else characterPosition $ mobCharacter me
+      }
+    }
+
+    currentPlayerPosition
+      = characterPosition
+      $ playerCharacter
+      $ mapPlayer map
+
+    -- TODO: this code is really full of magic numbers
+    playerCollision = colliding && (smoothPositionTime currentPlayerPosition < 0.95)
+
+    currentPlayerGridPosition = playerGridPosition $ mapPlayer map
+    myGridPosition = mobGridPosition me
+    colliding = currentPlayerGridPosition == myGridPosition

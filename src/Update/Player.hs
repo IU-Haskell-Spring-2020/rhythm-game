@@ -7,8 +7,9 @@ import Types.SmoothPosition
 import Update.SmoothPosition
 
 updatePlayer :: Float -> Float -> Player -> Player
-updatePlayer dt localDt =
-  updatePlayerAnimationTime dt . updatePlayerMovementLimitations localDt
+updatePlayer dt localDt
+  = updatePlayerAnimationTime dt
+  . updatePlayerMovementLimitations localDt
 
 updatePlayerAnimationTime :: Float -> Player -> Player
 updatePlayerAnimationTime dt me = me {

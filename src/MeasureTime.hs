@@ -2,7 +2,8 @@ module MeasureTime (scaledMeasureLocalTime) where
 
 import Data.Fixed
 
-offsetSeconds = 0.27
+offsetSeconds = 0.17
+-- offsetSeconds = 0
 offsetMeasures = 0
 bpm = 98
 secondsPerMeasure = 60 / (bpm / 4)

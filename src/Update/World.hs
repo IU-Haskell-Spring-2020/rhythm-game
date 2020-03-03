@@ -10,11 +10,12 @@ updateWorld :: Float -> World -> (World, Action)
 updateWorld dt world = (
   world {
     worldPassedTime = newPassedTime,
-    worldMap = updateMap dt localDt (worldMap world)
+    worldMap = newWorldMap
   },
-  NoAction
+  action
   )
     where
+      (newWorldMap, action) = updateMap dt localDt (worldMap world)
       newPassedTime = worldPassedTime world + dt
       localDt = scaledMeasureLocalTime (worldPassedTime world) timeScale
       timeScale = worldTimeScale world

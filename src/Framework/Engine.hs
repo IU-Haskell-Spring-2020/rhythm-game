@@ -2,6 +2,7 @@
 
 module Framework.Engine where
 
+import System.Random
 import Control.Monad
 import Foreign.C.Types
 import SDL (($=))
@@ -23,6 +24,7 @@ data KeyPress
 -- | Output action from state changes
 data Action
   = RestartMusic
+  | PlayOooEffect
   | Print String
   | CombinedAction Action Action
   | NoAction
@@ -69,6 +71,12 @@ runSDL
       SDL.Mixer.openAudio def 256
 
       music <- SDL.Mixer.load musicPath :: IO SDL.Mixer.Music
+      -- TODO: hardcode
+      sounds <- executeAll [
+          SDL.Mixer.load "resources/hurt1.ogg" :: IO SDL.Mixer.Chunk,
+          SDL.Mixer.load "resources/hurt2.ogg" :: IO SDL.Mixer.Chunk,
+          SDL.Mixer.load "resources/hurt3.ogg" :: IO SDL.Mixer.Chunk
+        ]
 
       window <-
         SDL.createWindow
@@ -89,9 +97,13 @@ runSDL
 
             let (updatedWorld, action) = updateWorld dt world
 
+            randomSoundIdx <- getStdRandom $ randomR (0, length sounds - 1)
+            let randomSound = sounds !! randomSoundIdx
+
             case action of
-              (Print s) -> print s
-              _         -> return ()
+              (Print s)     -> print s
+              PlayOooEffect -> SDL.Mixer.play randomSound
+              _             -> return ()
 
             events <- SDL.pollEvents
             let quit = elem SDL.QuitEvent $ map SDL.eventPayload events
@@ -152,12 +164,16 @@ mapCode _ = Nothing
 
 -- | Load images from paths into an array.
 loadImages :: [String] -> IO [SDL.Surface]
-loadImages paths
-  = foldM executeAndAppend [] (map SDL.Image.load paths)
-    where
-      executeAndAppend list action = do
-        output <- action
-        return (output:list)
+loadImages = executeAll . map SDL.Image.load
+
+executeAndAppend :: [a] -> IO a -> IO [a]
+executeAndAppend list action
+  = do
+      output <- action
+      return (output:list)
+
+executeAll :: [IO a] -> IO [a]
+executeAll = foldM executeAndAppend []
 
 draw :: [SDL.Surface] -> EnginePicture -> SDL.Surface -> IO ()
 draw textures Blank _ = return ()
